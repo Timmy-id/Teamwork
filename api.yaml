@@ -1,0 +1,613 @@
+openapi: 3.0.0
+info: 
+  title: Employee API
+  description: This is my an API that allows registered employees to create articles and comment 
+    on each other's articles.
+  version: 1.0.0
+  contact:
+    name: Oluwatimilehin Idowu
+    email: oluwatimilehin.id@gmail.com
+  license:
+    name: Apache 2.0
+    url: "http://apache.org/"
+servers:
+- url: http://localhost:5000
+  description: This is my local server
+
+paths:
+  '/auth/create-user':
+    post:
+      summary: Create a user
+      description: An employee can create an account
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: Luke
+                  required: true
+                lastName:
+                  type: string
+                  required: true
+                  example: Shaw
+                email:
+                  type: string
+                  required: true
+                  example: lshaw@gmail.com
+                userPassword:
+                  type: string
+                  format: password
+                  required: true
+                gender:
+                  type: string
+                  required: true
+                  example: Male
+                jobRole:
+                  type: string
+                  required: true
+                  example: Front-end Web Developer
+                department:
+                  type: string
+                  required: true
+                  example: IT
+                userAddress:
+                  type: string
+                  required: true
+                  example: Jericho, Ibadan
+      responses:
+        201:
+          description: Created
+          schema:
+            type: object
+            example: {status: "success", data: {
+              message: "User account created successfully",
+              token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+                userId: 1,
+                firstName: "Tonye",
+                lastName: "Cole",
+            } }
+            properties:
+              status:
+                type: string
+              data:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                  token: 
+                    type: string
+                  userId: 
+                    type: integer
+                  firstName: 
+                    type: string
+                  lastName: 
+                    type: string
+          
+        400:
+          description: Bad Request
+
+  '/auth/signin':
+      post:
+        summary: Login a user
+        description: Allow users to login and receive a token
+        tags:
+        - Users
+
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    example: new@gmail.com
+                    required: true
+                  userPassword:
+                    type: string
+                    required: true
+                    format: password
+
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: success
+                    data:
+                      type: object
+                      properties:
+                        token: 
+                          type: string
+                          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+                        userId: 
+                          type: integer
+                          example: 1
+                        firstName: 
+                          type: string
+                          example: Will
+                        lastName: 
+                          type: string
+                          example: Luke
+          '400':
+            description: Bad Request
+
+  '/auth/verify':
+      get:
+        summary: Verify a user
+        description: Verify a user token
+        tags:
+        - Users
+        security:
+        - token: []
+
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: boolean
+                  example: true
+                  
+          '401':
+            description: Token not valid
+
+  '/articles':
+      post:
+        summary: Create an article
+        description: A registered user can create an article
+        tags:
+          - Articles
+        security:
+        - token: []
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: Article title
+                  article:
+                    type: string
+                    example: This is my new article
+              
+        responses:
+          '201':
+            description: Created
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: success
+                    data:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Article successfully posted
+                        articleId:
+                          type: integer
+                          example: 1
+                        createdOn:
+                          type: string
+                          example: "2021-08-08"
+                        title:
+                          type: string
+                          example: My first article
+                    
+          '401':
+            description: Unauthorized
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Authorization denied
+
+  '/articles/{articleId}':
+    get:
+      summary: Find article by id
+      operationId: get-articles-article_id
+      description: Returns an article based in id
+      tags:
+        - Articles
+      security:
+      - token: []
+              
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      createdOn:
+                        type: string
+                        example: "2021-08-09 19:46:46.470756+00"
+                      title:
+                        type: string
+                        example: My title
+                      article:
+                        type: string
+                        example: My article was stated here
+                      comments:
+                        type: object
+                        properties:
+                          commentId:
+                            type: integer
+                            example: 1
+                          comment:
+                            type: string
+                            example: An example comment
+                          authorId:
+                            type: integer
+                            example: 1
+        '401':
+            description: Unauthorized
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Authorization denied
+                    
+    patch:
+      summary: Update article by id
+      operationId: put-articles-article_id
+      description: Returns the updated article based in id
+      tags:
+        - Articles
+      security:
+      - token: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Article title
+                article:
+                  type: string
+                  example: This is my new article
+              
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Article successfully updated
+                      title:
+                        type: string
+                        example: Updated title
+                      article:
+                        type: string
+                        example: My updated article was stated here
+                      
+        '401':
+            description: Unauthorized
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Authorization denied
+
+    delete:
+      summary: Delete article by id
+      operationId: delete-articles-article_id
+      description: Returns a successful message
+      tags:
+        - Articles
+      security:
+      - token: []
+              
+      responses:
+        '204':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Article successfully deleted
+                      
+        '401':
+            description: Unauthorized
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Authorization denied
+      parameters:
+        - name: articleId
+          in: path
+          description: id of article to use
+          required: true
+      
+  '/articles/{articleId}/comment':
+      post:
+        summary: Create a comment under an article
+        description: A registered user can create a comment
+        tags:
+          - Articles
+        security:
+        - token: []
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    type: string
+                    example: First comment
+                  
+        responses:
+          '201':
+            description: Created
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: success
+                    data:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Comment successfully created
+                        createdOn:
+                          type: string
+                          example: "2021-08-09 19:46:46.470756+00"
+                        articleTitle:
+                          type: string
+                          example: Article title
+                        article:
+                          type: string
+                          example: This is the article
+                        comment:
+                          type: string
+                          example: My first comment
+                    
+          '401':
+            description: Unauthorized
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Authorization denied
+
+
+        parameters:
+          - name: articleId
+            in: path
+            description: id of article to use
+            required: true
+
+  '/feed':
+    get:
+      summary: Get all articles
+      operationId: get-all-articles
+      description: Returns all articles
+      tags:
+        - Articles
+      security:
+      - token: []
+              
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        title:
+                          type: string
+                          example: My title
+                        article:
+                          type: string
+                          example: My article was stated here
+                        createdOn:
+                          type: string
+                          example: "2021-08-09 19:46:46.470756+00"
+                        authorId:
+                          type: integer
+                          example: 1
+        '401':
+            description: Unauthorized
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Authorization denied
+
+  '/gifs':
+      post:
+        summary: Create a gif
+        description: A registered user can create a gif
+        tags:
+          - Gifs
+        security:
+        - token: []
+
+        requestBody:
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: Gif title
+                  image:
+                    type: string
+                    format: binary
+                    required: true
+              
+        responses:
+          '201':
+            description: Created
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: success
+                    data:
+                      type: object
+                      properties:
+                        gifId:
+                          type: integer
+                          example: 1
+                        message:
+                          type: string
+                          example: GIF image successfully posted
+                        createdOn:
+                          type: string
+                          example: "2021-08-08"
+                        title:
+                          type: string
+                          example: My first gif
+                        imageUrl:
+                          type: string
+                          example: https://res.cloudinary.com/timmix95/image/upload/v1628553400/rctuod9ofnh3wxhyk0az.png
+                    
+          '401':
+            description: Unauthorized
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Authorization denied
+
+components:
+  schemas:
+
+    User:
+      description: Model containing user info
+      properties:
+        id:
+          type: integer
+          example: 1
+        first name:
+          type: string
+          example: Phillip
+        last name:
+          type: string
+          example: Pouis
+        email:
+          type: string
+          example: pp@gmail.com
+        password:
+          type: string
+          format: password
+        gender:
+          type: string
+          example: Male
+        job role:
+          type: string
+          example: Secretary
+        department:
+          type: string
+          example: Administration
+        address:
+          type: string
+          example: 1, Abiola way, Ibadan
+          
+          
+          
+          
+          
+          
+
+  securitySchemes:
+    token:
+      description: For accessing the articles API, a valid JWT token must be passed in the 
+        'Authorization' header. A valid JWT token is generated
+          by the users API and returned as response of a call to the route /auth/signIn 
+          given a valid user & password.
+      type: apiKey
+      name: token
+      in: header
