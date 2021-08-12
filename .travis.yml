@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - 'stable'
+install:
+  - npm ci
+cache: npm
+services: 
+  - postgresql
+before_script:
+  - psql -c 'create database new_teamwork;' -U postgres
+script:
+  - npm test
+after_success:
+- npm run coveralls
