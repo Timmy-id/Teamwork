@@ -15,7 +15,7 @@ const signInUser = async (req, res) => {
         [email]);
 
         if (user.rows.length === 0) {
-            return res.status(401).json("Invalid credentials");
+            return res.status(400).json("Invalid email or password");
         }
 
         const validPassword = await bcrypt.compare(
@@ -24,7 +24,7 @@ const signInUser = async (req, res) => {
         );
 
         if (!validPassword) {
-            return res.status(401).json("Invalid credentials");
+            return res.status(400).json("Invalid email or password");
         }
 
         const data = user.rows[0];
