@@ -4,8 +4,6 @@ node_js:
 env:
   global:
     - a83a409f2a689be50b05870658231b712a58e822c067298fa51d7fc8ad165912
-install:
-  - npm install
 cache:
   directories: [node_modules]
 services: 
@@ -14,5 +12,6 @@ before_script:
   - psql -c 'create database new_teamwork;' -U postgres
 script:
   - npm test
+  - npm install
 after_script:
   - npm run coverage
