@@ -13,6 +13,6 @@ services:
 before_script:
   - psql -c 'create database new_teamwork;' -U postgres
 script:
-  - npm run test
+  - npm test
 after_script:
   - npm run coverage
